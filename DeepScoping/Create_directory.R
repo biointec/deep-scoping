@@ -9,4 +9,9 @@ if (!dir.exists("own_results")){
   }
 }
 
-
+if (!dir.exists("Population")){
+  succes<-dir.create("Population")
+  if (!succes){
+    print("error in create directory")
+  }
+}
