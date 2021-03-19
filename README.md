@@ -14,11 +14,8 @@
 ## data 
 This directory contains the original base population used for each simulation study and several directories where the simulation results can be stored.
 
-## Figures
-This directory contains the original figures used for the article.
-
 ## make_figures
-This directory contains the R scripts used to make the figures. The simulated data should be put in the data/\<method\> directory. 
+This directory contains the R script used to visualize the results. The simulated data should be put in the data/\<method\> directory. 
 
 ## own_results
 Empty directory where simulation results will be saved. This directory is creating by running the script Create_directory.R.
