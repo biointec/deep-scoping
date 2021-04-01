@@ -2,17 +2,18 @@ built.bank<-function(genome    = hv.genome,
                      Haploids  = CAP.haploids,
                      Genotype  = TP.genos,
                      Phenotype = TP.phenos,
-                     size      = 5000){
+                     size      = 500){
     
     n.ind<-dim(Genotype)[1]
     n.parents<-size/ind.per.cross
-  
+    #make an empty crossing block (pre-allocatie)
     crossing.block.i <- matrix("",n.parents,2)
     
     line.names <- row.names(Genotype)
     ND.lines <- str_subset(string = line.names, pattern = "^ND")
     MN.lines <- setdiff(x = line.names, y = ND.lines)
     
+    #split parent into two populations MN and ND lines
     MN.lines <- names(sort(Phenotype[MN.lines,], decreasing = T))
     ND.lines <- names(sort(Phenotype[ND.lines,], decreasing = T))
     
@@ -23,6 +24,7 @@ built.bank<-function(genome    = hv.genome,
     available<-seq(length(ND.lines))
     chosen<-c()
     
+    #For each individual select the one that maximizes the S-Score (max variation)
     for (i in seq(n.parents)){
       
       p1<-MN.lines[((i-1)%%(length( MN.lines)))+1]
@@ -50,11 +52,12 @@ built.bank<-function(genome    = hv.genome,
      
     }
     
+  
     if( length(unique(c(crossing.block.i[,1], crossing.block.i[,2])))!=n.parents*2 ){
       stop("Non-unique parents have been selected")
     }
     
-    
+    #construct haploids based on the selected parents
     candidate.haploid.i <- make.population(genome = genome, 
                                            parental.haploids = Haploids,
                                            crossing.block = crossing.block.i,
