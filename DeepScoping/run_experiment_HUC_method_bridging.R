@@ -235,24 +235,24 @@ for (change in tp.change) {
       # Residual variance scaled to achieve desired h2
       V_e = n.rep * n.env * ((TP.V_g / h2) - TP.V_g)
       
-      #create Gene bank
+  
       CAP.phenos <- phenotype.population( genome = hv.genome,
                                           haploid.genos = CAP.haploids,
                                           V_E = V_E,
                                           V_e = V_e,
                                           n.env = n.env,
                                           n.rep = n.rep )
-      
+      #build genebank
       GeneBank<-built.bank(genome    = hv.genome,
                            Haploids  = CAP.haploids,
                            Genotype  = CAP.genos,
                            Phenotype = CAP.phenos$mean.pheno.values,
                            size      = size.genebank)
-      
+      #genotype genebank
       GeneBank.genotype<-genotype.loci(haploid.genos = GeneBank, 
                                        genome = hv.genome, 
                                        include.QTL = F)
-      
+      #phenotype genebank
       GeneBank.Phenotype<-phenotype.population( genome = hv.genome,
                                                 haploid.genos = GeneBank,
                                                 V_E = V_E,
@@ -302,7 +302,7 @@ for (change in tp.change) {
       # Subset the relationship matrix for the selection candidates
       A.sc <- A[row.names(Population.list[[rep.iter]]$Population[[BC.start]]$Genotype), row.names(Population.list[[rep.iter]]$Population[[BC.start]]$Genotype)]
       
-      # Selects parents
+      # Selects parents elite population
       parent.selections.list<-Elite.Selection(value.mat = predictions.out$GEBV, 
                                               sel.intensity = parents.sel.intensity,
                                               genos = Population.list[[rep.iter]]$Population[[BC.start]]$Genotype,
@@ -311,6 +311,7 @@ for (change in tp.change) {
       
       candidate.haploid.i<-TP.haploids.i
       
+      # Select pre-breed individuals according to HUC
       selection.pre<-H_UC_Bridging(candidate.marker.genos.i=Population.list[[rep.iter]]$Population[[BC.start]]$Genotype,
                                             candidate.haplotype=Population.list[[rep.iter]]$Population[[BC.start]]$Haploids,
                                             GeneBank,
@@ -539,7 +540,7 @@ for (change in tp.change) {
  
         ##### Step 6 - Select the parents of the next generation --------------------------------------- 6 Select Parents
         
-        
+        #Select elite individuals
         parent.selections.list<-Elite.Selection(value.mat =  predictions.out$GEBV, 
                                                          sel.intensity = parents.sel.intensity,
                                                          genos = candidate.marker.genos.i,
@@ -551,7 +552,7 @@ for (change in tp.change) {
                                         line.names = parent.selections.list$parent.selections.i$lines.sel[1:(greedy+pre)])
         
         
-        
+        #Select pre-breed individuals according to HUC
         selection.pre<-H_UC_Bridging(candidate.marker.genos.i,
                                      candidate.haplotype=candidate.haploid.i,
                                      GeneBank,
@@ -574,6 +575,7 @@ for (change in tp.change) {
         parent.selections.i<-parent.selections.list$parent.selections.i   
      
         parent.selections.i<- selection.pre$parent.selections.i
+        # build crossing block for next breeding cycle
         crossing.block.i<-selection.pre$crossing.block.i
         
         # The parents are selected and crossed at the F3 stage, so subset the haploid genotpyes from the F1:3
