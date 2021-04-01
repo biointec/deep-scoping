@@ -3,14 +3,13 @@ library(ggplot2)
 library(egg)
 library(gridExtra)
 
-#map<-"own_results"
-#map<-"data/Models"
-map<-"data/Genenbank_grootte"
+
+map<-"data/own_results"
   
 if (file.exists(paste0(map,"/Results"))){
   unlink(paste0(map,"/Results"), recursive=TRUE)
 }
-
+#get list with available files in that map
 files<-dir(map, full.names = T)
 names<-dir(map, full.names = F)
 results<-c()
@@ -20,17 +19,15 @@ dir.create(paste0(map,"/Results"))
 
 
 iter<-0
+#For each dataset:
+#Data is collected from the selected files (select.exp) from breeding cycle startbc to endbc
 startbc<-c(5,5,5,5,5)
 endbc<-c(50,50,50,50,50)
 select.exp<-c(1,2,3,4,5)
-#
-#select.exp<-c(76,88,68,80,274,275,456)
-#exp.name<-c("Deep scoping method (80/10/10 BC5)", "Deep scoping method (80/10/10 BC20)", "Deep scoping method (50/10/40 BC5)", "Deep scoping method (50/10/40 BC20)","HUC method (80/20/00 BC5)","HUC method (80/20/00 BC20)","Truncation selection")
-#startbc<-c(5,20,5,20,5,20,1)
-#select.exp<-c(263,68,396)
-#endbc<-c(50,50,50,50,50,50,20)
+#Used to make a legend
 exp.name<-c("Size 0200", "Size 1000", "Size 2000" , "Size 3000","Size 5000")
 
+#For each dataset, import data into a dataframe results
 for(expir in c(select.exp)){
   iter<-iter+1
   load(files[expir])
@@ -58,12 +55,9 @@ for(expir in c(select.exp)){
       
      # for(br.cycle in seq(metadata$n.cycles)){
       for(br.cycle in seq(startbc[iter],endbc[iter])){
-      #  if(br.cycle<=startbc[iter]){
-        #  gen<-rep_baseline$sim.results[[br.cycle]]
-      #  }else{
           cycle.name<-paste0("cycle",br.cycle)
           gen<-sim[[cycle.name]]
-      #  }
+   
         
          
           candidate.af.i<-gen$geno.summary.stats$candidate.af
@@ -84,11 +78,8 @@ for(expir in c(select.exp)){
       Data<-data.frame(t(out))
       
       Data$cycle<-seq(startbc[iter],endbc[iter])
-     
-      # nodige data in 1 column zetten met factor for ggplot legend
-      #correct the breeding cycle for the preselected results
  
-      cycle<-Data$cycle#+((iter-1)*5)
+      cycle<-Data$cycle
       
       m1<-cbind(cycle, Data$max_reachable/Data$maximum, t(geneticValue.top), iter)
       
@@ -108,11 +99,9 @@ for(expir in c(select.exp)){
 }#Close the for expir loop
 results$Legend<-factor(results$Legend, levels=seq(length(fac)),labels = fac)
 
-
-#bereken de gemiddelde per generatie en de std om deze dan te plotten
 sum.result<-data.frame(cycle = seq(metadata$n.cycles))
   
-
+#Calculate the averaged value per breeding cycle and per method
 result.cycle<-c()
  
 for(b.c in seq(min(startbc),max(endbc))){
@@ -134,12 +123,11 @@ for(b.c in seq(min(startbc),max(endbc))){
     result.cycle<-rbind(result.cycle, temp.cycle)
     
 }
-
 result.cycle$Type<-paste0(result.cycle$Type," (",result.cycle$Legend,")")
 
+save("result.cycle",file="FigureData.RData")
 
-save("result.cycle",file="GeneBank_size.RData")
-
+#Make Figure
 title<-"Greedy parental selection with prebreeding"
 f1<-ggplot(data=result.cycle, aes(x=cycle, y=GV, colour=Type,linetype=Type)) +
     geom_line(size=1.2)  +
