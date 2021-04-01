@@ -1,6 +1,6 @@
 Crossing.Scoping<-function(candidates_donor=SelDonors4UC2,
                            candidates_popE=Poptop,
-                            poplayer=PopD2,
+                           poplayer=PopD2,
                            Z=Geno,
                            GEBV,
                            layers){
@@ -16,7 +16,7 @@ Crossing.Scoping<-function(candidates_donor=SelDonors4UC2,
   CrosBlock<-list()
   preselect=0
  
-  #for each layer ...	
+  #for each layer ...	Layer 4 is first selected, then layer 3, 2, ...
   for (Layer in seq(layers,1,-1)){
     PopL<-c()
     if (Layer< layers){
@@ -33,23 +33,23 @@ Crossing.Scoping<-function(candidates_donor=SelDonors4UC2,
     for (i in length(already.selected)){
       selected.names<-selected.names[!selected.names==already.selected[i]]
     }
-    }
+  }
     
     
     
-    ordr<-order(GEBV[selected.names,],decreasing=T)
-    #get names and values
-    ind.names <- selected.names[ordr]
-    ind.values<- as.matrix(GEBV[selected.names,])[ordr,]  
+  ordr<-order(GEBV[selected.names,],decreasing=T)
+  #get names and values
+  ind.names <- selected.names[ordr]
+  ind.values<- as.matrix(GEBV[selected.names,])[ordr,]  
 
     
-    Parents_available<-ind.names
+  Parents_available<-ind.names
     
-    #Increase the threshold of the pre-selection
-    preselect<-preselect+100
+  #Increase the threshold of the pre-selection
+  preselect<-preselect+100
   
-    free.position<-seq(preselect)
-    all_parents<-c()
+  free.position<-seq(preselect)
+  all_parents<-c()
 
   #select first parent------------------------------------------------------------
   name1<-candidates_donor[[Layer]][1]
@@ -59,13 +59,13 @@ Crossing.Scoping<-function(candidates_donor=SelDonors4UC2,
   
   score<-0
   sel<-0
-  
-  if (Layer==layers){
+  #Select first parent of that layer
+  if (Layer==layers){ #if this is your first layer
     
   for (i in free.position){
     temp.name<- Parents_available[i]
     temp.geno<- as.matrix(Z[temp.name,])
-    temp.score<-sum(colVars(rbind(all_parents, t(temp.geno)))[marker_seq])
+    temp.score<-sum(colVars(rbind(all_parents, t(temp.geno)))[marker_seq]) #S-Score
     if (temp.score == 0 ){ 
       temp.score<-sum(colVars(rbind(all_parents, t(temp.geno))))
     }
@@ -80,7 +80,7 @@ Crossing.Scoping<-function(candidates_donor=SelDonors4UC2,
     for (i in free.position[-chosen]){
       temp.name<- Parents_available[i]
       temp.geno<- as.matrix(Z[temp.name,])
-      temp.score<-sum(colVars(rbind(all_parents, t(temp.geno)))[marker_seq])
+      temp.score<-sum(colVars(rbind(all_parents, t(temp.geno)))[marker_seq]) #S-Score
       if (temp.score == 0 ){ 
         temp.score<-sum(colVars(rbind(all_parents, t(temp.geno))))
       }
@@ -99,13 +99,14 @@ Crossing.Scoping<-function(candidates_donor=SelDonors4UC2,
   
   all_parents<-rbind(all_parents, Z[p2,])
   
+  # Keep track of the selected alleles
   marker_allele[1,(gen1+gen2)==-2]<-marker_allele[1,(gen1+gen2)==-2]+1
   marker_allele[2,(gen1+gen2)== 2]<-marker_allele[2,(gen1+gen2)==2]+1
  
   marker_allele[,abs(gen1+gen2)== 1]<-marker_allele[,abs(gen1+gen2)== 1]+1
   marker_seq[marker_allele[1,]>0 & marker_allele[2,]>0]<- FALSE
   
-  
+  #Selected the remaining parents for that layer
   for (sel.round in seq(2,length(candidates_donor[[Layer]]))){
     
     name1<-candidates_donor[[Layer]][sel.round]
@@ -121,7 +122,7 @@ Crossing.Scoping<-function(candidates_donor=SelDonors4UC2,
       temp.name<-Parents_available[i]
       temp.geno<- as.matrix(Z[temp.name,])
       
-      temp.score<-sum(colVars(rbind(all_parents, t(temp.geno)))[marker_seq])
+      temp.score<-sum(colVars(rbind(all_parents, t(temp.geno)))[marker_seq]) #S-Score
       if (temp.score == 0 ){ 
         temp.score<-sum(colVars(rbind(all_parents, t(temp.geno))))
       }
@@ -136,7 +137,7 @@ Crossing.Scoping<-function(candidates_donor=SelDonors4UC2,
     p2<-c(p2, Parents_available[sel])
     name2<-Parents_available[sel]
     gen2<-Z[name2,]
-    
+    #Keep track of selected alleles
     marker_allele[1,(gen1+gen2)==-2]<-marker_allele[1,(gen1+gen2)==-2]+1
     marker_allele[2,(gen1+gen2)== 2]<-marker_allele[2,(gen1+gen2)==2]+1
    
