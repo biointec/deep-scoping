@@ -43,20 +43,10 @@ H_UC_Bridging<-function(candidate.marker.genos.i,
 
   PopD <- sample(setdiff(rownames(GEBV),PopE),(dim(GEBV)[1]-p.sel/2),replace = FALSE)
   
- 
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   ###########
   ###########
+  
+  #Remove QTL markers from Haplotype
   Haplo<-rbind(as.matrix(do.call("rbind", candidate.haplotype)),
                as.matrix(do.call("rbind",GeneBank)))
   
@@ -68,6 +58,8 @@ H_UC_Bridging<-function(candidate.marker.genos.i,
   }
   
   Haplo<-Haplo[,-positions]
+  
+  #Calculate HEBV
   ObjectHEBV <- GetHEBVmat(ObjectGeno = Haplo,
                            ObjectBeta = Bhat ,
                            ObjectMap = map,
@@ -95,7 +87,7 @@ H_UC_Bridging<-function(candidate.marker.genos.i,
   ObjectHEBV<-list(HEBV=HEBV,POSITION=ObjectHEBV$POSITION)
   ########
   ########
-  
+  #Calculate H-score
   
   
   SelDonor <- c()
@@ -140,7 +132,7 @@ H_UC_Bridging<-function(candidate.marker.genos.i,
   
   parent.sel<-parents.information$parent.selections.i
   cros.block<-parents.information$crossing.block.i
-  
+  #Build crossing block
   block<-rbind(cbind(as.character(cros$DONOR), as.character(cros$RECIPIENT)))
   cros.block[seq((100-(p.sel))/2+1,50),]<-block
   
