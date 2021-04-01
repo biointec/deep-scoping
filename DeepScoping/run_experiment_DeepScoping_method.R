@@ -181,8 +181,11 @@ for (change in tp.change) {
       # All code below this line is variable in each iteration of the simulation
       first.bc<-as.numeric(substr(names(Population.list[[rep.iter]]$Population)[BC.start],6,nchar(names(Population.list[[rep.iter]]$Population)[BC.start])))
       
+      #fraction elite
       greedy<-greedy_vector[first.bc]
+      #fraction of individuals in layer 1-4
       sco<-sco_vector[first.bc]
+      #fraction of individuals in layer 0
       pre<-pre_vector[first.bc]
       
       hv.genome<-Population.list[[rep.iter]]$genome
@@ -230,27 +233,26 @@ for (change in tp.change) {
       V_E = TP.V_g * 8
       # Residual variance scaled to achieve desired h2
       V_e = n.rep * n.env * ((TP.V_g / h2) - TP.V_g)
-      
-      #create Gene bank
+    
       CAP.phenos <- phenotype.population( genome = hv.genome,
                                           haploid.genos = CAP.haploids,
                                           V_E = V_E,
                                           V_e = V_e,
                                           n.env = n.env,
                                           n.rep = n.rep )
-      #Build a gene bank
+      #Build a genebank
       GeneBank<-built.bank(genome    = hv.genome,
                            Haploids  = CAP.haploids,
                            Genotype  = CAP.genos,
                            Phenotype = CAP.phenos$mean.pheno.values,
                            size      = size.genebank)
       
-      #Genotype the gene bank
+      #Genotype the genebank
       GeneBank.genotype<-genotype.loci(haploid.genos = GeneBank, 
                                        genome = hv.genome, 
                                        include.QTL = F)
       
-      #Phenotype the gene bank
+      #Phenotype the genebank
       GeneBank.Phenotype<-phenotype.population( genome = hv.genome,
                                                 haploid.genos = GeneBank,
                                                 V_E = V_E,
@@ -301,7 +303,7 @@ for (change in tp.change) {
       # Subset the relationship matrix for the selection candidates
       A.sc <- A[row.names(Population.list[[rep.iter]]$Population[[BC.start]]$Genotype), row.names(Population.list[[rep.iter]]$Population[[BC.start]]$Genotype)]
       
-      # Selects parents
+      # Selects parents for the elite population
       parent.selections.list<-Elite.Selection(value.mat = predictions.out$GEBV, 
                                                        sel.intensity = parents.sel.intensity,
                                                        genos = Population.list[[rep.iter]]$Population[[BC.start]]$Genotype,
@@ -311,6 +313,7 @@ for (change in tp.change) {
       
       candidate.haploid.i<-TP.haploids.i
       
+      # Selects parents for each layer
       selection.pre<-DeepScoping(candidate.marker.genos.i=Population.list[[rep.iter]]$Population[[BC.start]]$Genotype,
                                             candidate.haplotype=Population.list[[rep.iter]]$Population[[BC.start]]$Haploids,
                                             GeneBank,
@@ -539,7 +542,7 @@ for (change in tp.change) {
           as.numeric()
           
         ##### Step 6 - Select the parents of the next generation --------------------------------------- 6 Select Parents
-        
+        #select elite population
         parent.selections.list<-Elite.Selection(value.mat =  predictions.out$GEBV, 
                                                          sel.intensity = parents.sel.intensity,
                                                          genos = candidate.marker.genos.i,
@@ -551,7 +554,7 @@ for (change in tp.change) {
         top.haploids <- select.haploids(haploid.genos = candidate.haploid.i,
                                         line.names = parent.selections.list$parent.selections.i$lines.sel[1:(greedy)])
         
-        
+        #select layers
         selection.pre<-DeepScoping(candidate.marker.genos.i=candidate.marker.genos.i,
                                               candidate.haplotype=candidate.haploid.i,
                                               GeneBank,
@@ -573,14 +576,7 @@ for (change in tp.change) {
         Gene.info<-QTL.max(genome=hv.genome, haploid = GeneBank)
                                    
         parent.selections.i<-parent.selections.list$parent.selections.i
-        
-        
-        ####----------------------------------------------------------------------------------------------------------------
-        ####----------------------------------------------------------------------------------------------------------------
-        ####                                            EXPERIMENTAL DESIGN
-        ####----------------------------------------------------------------------------------------------------------------
-        ####----------------------------------------------------------------------------------------------------------------
-      
+       
      
         parent.selections.i<- selection.pre$parent.selections.i
         crossing.block.i<-selection.pre$crossing.block.i
