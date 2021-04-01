@@ -18,11 +18,9 @@ DeepScoping<-function(candidate.marker.genos.i,
          Map=map,
          rep.iter,
          genome=hv.genome){
-  
 
   Geno<-rbind(candidate.marker.genos.i, GeneBank.genotype)
-  
-
+ 
   Bhat <- predictions.out$solve.out$u 
  
   GEBV <- Geno%*%Bhat
@@ -46,6 +44,7 @@ DeepScoping<-function(candidate.marker.genos.i,
   
   ###########
   ###########
+  #Remove QTL markers from haplotype
   Haplo<-rbind(as.matrix(do.call("rbind", candidate.haplotype)),
                as.matrix(do.call("rbind",GeneBank)))
   
@@ -57,6 +56,7 @@ DeepScoping<-function(candidate.marker.genos.i,
   }
   
   Haplo<-Haplo[,-positions]
+  #Get HEBVs
   ObjectHEBV <- GetHEBVmat(ObjectGeno = Haplo,
                            ObjectBeta = predictions.out$solve.out$u,
                            ObjectMap = Map,
@@ -84,7 +84,7 @@ DeepScoping<-function(candidate.marker.genos.i,
   ObjectHEBV<-list(HEBV=HEBV,POSITION=ObjectHEBV$POSITION)
   ########
   ########
-  
+  #Calculate H-score for layer 0
   SelDonor1 <- c()
   SelDonor2 <- list()
   for (i in seq(layers+1)){
@@ -116,7 +116,7 @@ DeepScoping<-function(candidate.marker.genos.i,
     HSelDonor1 <<- rbind(HSelDonor1,tmp[order(tmp$H,decreasing =TRUE),][1,])
   }))
   
-  
+  #for each layer (1-4) calculate H-score
   for (i in seq(layers)){
 
   invisible(lapply(1:(sco/(layers*2)),function(iter){
@@ -153,7 +153,7 @@ DeepScoping<-function(candidate.marker.genos.i,
   }
   
   #We have the Donor individual, now we will reselect the PopE population based on the greedy population with the eye on the preservation of the population
-  
+  #Build the crossing block for the layers 1-4
   cros.sco<-Crossing.Scoping(candidates_donor=SelDonors4UC2,
                    candidates_popE=PopTop,
                    poplayer=PopD2,
@@ -161,7 +161,7 @@ DeepScoping<-function(candidate.marker.genos.i,
                    GEBV,
                    layers)
   
-  #USING Crossing_Scoping_v2.R
+  #Build the crossing block for layer 0
   cros.pre<-Crossing.Scoping(candidates_donor=list(SelDonors4UC1),
                              candidates_popE=list(Poptop),
                              poplayer=PopD2,
@@ -171,7 +171,7 @@ DeepScoping<-function(candidate.marker.genos.i,
   
   
 
-  
+  #Summarize the crossing information
   
   parent.sel<-parents.information$parent.selections.i
   cros.block<-parents.information$crossing.block.i
